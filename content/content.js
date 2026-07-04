@@ -5,6 +5,7 @@
   const STORAGE_KEYS = {
     lastYear: 'periodCalendar.lastYear',
     notes: 'periodCalendar.notes',
+    theme: 'periodCalendar.theme',
   };
 
   const state = {
@@ -13,18 +14,25 @@
     open: false,
     dismissed: false,
     editingIso: null,
+    theme: 'dark',
   };
 
   // ---------- storage ----------
 
   function loadState(callback) {
-    chrome.storage.local.get([STORAGE_KEYS.lastYear, STORAGE_KEYS.notes], (result) => {
-      if (typeof result[STORAGE_KEYS.lastYear] === 'number') {
-        state.year = result[STORAGE_KEYS.lastYear];
+    chrome.storage.local.get(
+      [STORAGE_KEYS.lastYear, STORAGE_KEYS.notes, STORAGE_KEYS.theme],
+      (result) => {
+        if (typeof result[STORAGE_KEYS.lastYear] === 'number') {
+          state.year = result[STORAGE_KEYS.lastYear];
+        }
+        state.notes = result[STORAGE_KEYS.notes] || {};
+        if (result[STORAGE_KEYS.theme] === 'light' || result[STORAGE_KEYS.theme] === 'dark') {
+          state.theme = result[STORAGE_KEYS.theme];
+        }
+        callback();
       }
-      state.notes = result[STORAGE_KEYS.notes] || {};
-      callback();
-    });
+    );
   }
 
   function saveLastYear() {
@@ -33,6 +41,10 @@
 
   function saveNotes() {
     chrome.storage.local.set({ [STORAGE_KEYS.notes]: state.notes });
+  }
+
+  function saveTheme() {
+    chrome.storage.local.set({ [STORAGE_KEYS.theme]: state.theme });
   }
 
   // ---------- DOM setup ----------
@@ -74,6 +86,17 @@
     (document.body || document.documentElement).appendChild(host);
   }
 
+  function applyTheme() {
+    host.classList.toggle('pc-theme-light', state.theme === 'light');
+  }
+
+  function toggleTheme() {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    applyTheme();
+    saveTheme();
+    renderPanel();
+  }
+
   // ---------- pill ----------
 
   function renderPill() {
@@ -112,25 +135,53 @@
     const header = document.createElement('div');
     header.className = 'pc-panel-header';
 
+    const leftSpacer = document.createElement('div');
+
+    const yearNav = document.createElement('div');
+    yearNav.className = 'pc-year-nav';
     const prevBtn = makeButton('‹', 'Previous year', () => changeYear(-1), 'pc-btn-icon');
     const title = document.createElement('div');
     title.className = 'pc-panel-title';
     title.textContent = String(state.year);
     const nextBtn = makeButton('›', 'Next year', () => changeYear(1), 'pc-btn-icon');
-    const printBtn = makeButton('Print', 'Print calendar', () => window.print());
+    yearNav.appendChild(prevBtn);
+    yearNav.appendChild(title);
+    yearNav.appendChild(nextBtn);
+
+    const actions = document.createElement('div');
+    actions.className = 'pc-header-actions';
+    const todayBtn = makeButton('Today', 'Jump to today', () => goToToday());
+    const themeBtn = makeButton(
+      state.theme === 'light' ? '🌙' : '☀️',
+      state.theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode',
+      toggleTheme,
+      'pc-btn-icon'
+    );
     const clearBtn = makeButton('Clear notes', `Clear all notes for ${state.year}`, () => clearYearNotes());
     const closeBtn = makeButton('✕', 'Close', () => {
       state.open = false;
       renderPanel();
     }, 'pc-btn-icon');
+    actions.appendChild(todayBtn);
+    actions.appendChild(themeBtn);
+    actions.appendChild(clearBtn);
+    actions.appendChild(closeBtn);
 
-    header.appendChild(prevBtn);
-    header.appendChild(title);
-    header.appendChild(nextBtn);
-    header.appendChild(printBtn);
-    header.appendChild(clearBtn);
-    header.appendChild(closeBtn);
+    header.appendChild(leftSpacer);
+    header.appendChild(yearNav);
+    header.appendChild(actions);
     return header;
+  }
+
+  function goToToday() {
+    const today = new Date();
+    if (state.year !== today.getFullYear()) {
+      state.year = today.getFullYear();
+      saveLastYear();
+    }
+    renderPanel();
+    const todayEl = panel.querySelector('.pc-day-today');
+    if (todayEl) todayEl.scrollIntoView({ block: 'center' });
   }
 
   function makeButton(text, title, onClick, extraClass) {
@@ -304,6 +355,7 @@
 
   mount();
   loadState(() => {
+    applyTheme();
     renderPill();
     renderPanel();
   });

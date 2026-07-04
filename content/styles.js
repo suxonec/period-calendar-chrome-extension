@@ -3,6 +3,42 @@
 window.PERIOD_CALENDAR_CSS = `
 :host {
   all: initial;
+
+  --pc-bg-panel: #1c1c1e;
+  --pc-bg-pill: rgba(28, 28, 30, 0.88);
+  --pc-text: #e6e7eb;
+  --pc-text-muted: #55565b;
+  --pc-weekday-header: #8a8c92;
+  --pc-accent: #e0a84a;
+  --pc-weekend: #6fb3ff;
+  --pc-border: rgba(255, 255, 255, 0.08);
+  --pc-btn-bg: rgba(255, 255, 255, 0.06);
+  --pc-btn-bg-hover: rgba(255, 255, 255, 0.14);
+  --pc-btn-border: rgba(255, 255, 255, 0.1);
+  --pc-day-hover: rgba(255, 255, 255, 0.08);
+  --pc-modal-bg: #232326;
+  --pc-input-bg: #17171a;
+  --pc-input-border: rgba(255, 255, 255, 0.12);
+  --pc-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+:host(.pc-theme-light) {
+  --pc-bg-panel: #ffffff;
+  --pc-bg-pill: rgba(255, 255, 255, 0.92);
+  --pc-text: #1c1c1e;
+  --pc-text-muted: #b3b4b8;
+  --pc-weekday-header: #6a6b70;
+  --pc-accent: #b5790f;
+  --pc-weekend: #1a56db;
+  --pc-border: rgba(0, 0, 0, 0.1);
+  --pc-btn-bg: rgba(0, 0, 0, 0.05);
+  --pc-btn-bg-hover: rgba(0, 0, 0, 0.1);
+  --pc-btn-border: rgba(0, 0, 0, 0.14);
+  --pc-day-hover: rgba(0, 0, 0, 0.06);
+  --pc-modal-bg: #ffffff;
+  --pc-input-bg: #f2f2f3;
+  --pc-input-border: rgba(0, 0, 0, 0.14);
+  --pc-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 .pc-root, .pc-root * {
@@ -21,8 +57,8 @@ window.PERIOD_CALENDAR_CSS = `
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: rgba(28, 28, 30, 0.88);
-  color: #d8dadf;
+  background: var(--pc-bg-pill);
+  color: var(--pc-text);
   border-radius: 5px;
   font-size: 12px;
   line-height: 1.4;
@@ -38,18 +74,18 @@ window.PERIOD_CALENDAR_CSS = `
 }
 
 .pc-pill-label {
-  color: #e0a84a;
+  color: var(--pc-accent);
   font-weight: 600;
 }
 
 .pc-pill-date {
-  color: #d8dadf;
+  color: var(--pc-text);
 }
 
 .pc-pill-dismiss {
   margin-left: 2px;
   padding: 0 3px;
-  color: #9a9ca3;
+  color: var(--pc-weekday-header);
   border: none;
   background: transparent;
   font-size: 13px;
@@ -59,8 +95,8 @@ window.PERIOD_CALENDAR_CSS = `
 }
 
 .pc-pill-dismiss:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--pc-text);
+  background: var(--pc-day-hover);
 }
 
 /* ---------- Expanded panel ---------- */
@@ -72,34 +108,48 @@ window.PERIOD_CALENDAR_CSS = `
   z-index: 2147483647;
   width: min(880px, calc(100vw - 16px));
   max-height: calc(100vh - 60px);
-  background: #1c1c1e;
-  color: #e6e7eb;
+  background: var(--pc-bg-panel);
+  color: var(--pc-text);
   border-radius: 8px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--pc-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .pc-panel-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--pc-border);
   flex: 0 0 auto;
+}
+
+.pc-year-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.pc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .pc-panel-title {
   font-weight: 700;
   font-size: 15px;
-  margin-right: auto;
 }
 
 .pc-btn {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e6e7eb;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--pc-btn-bg);
+  color: var(--pc-text);
+  border: 1px solid var(--pc-btn-border);
   border-radius: 5px;
   padding: 4px 9px;
   font-size: 12px;
@@ -107,7 +157,7 @@ window.PERIOD_CALENDAR_CSS = `
 }
 
 .pc-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--pc-btn-bg-hover);
 }
 
 .pc-btn-icon {
@@ -141,7 +191,7 @@ window.PERIOD_CALENDAR_CSS = `
 
 .pc-weekday-row {
   font-size: 10px;
-  color: #8a8c92;
+  color: var(--pc-weekday-header);
   margin-bottom: 2px;
 }
 
@@ -152,7 +202,7 @@ window.PERIOD_CALENDAR_CSS = `
 .pc-week-label {
   font-size: 10px;
   font-weight: 700;
-  color: #e0a84a;
+  color: var(--pc-accent);
   text-align: center;
 }
 
@@ -166,19 +216,19 @@ window.PERIOD_CALENDAR_CSS = `
 }
 
 .pc-day:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--pc-day-hover);
 }
 
 .pc-day-weekend {
-  color: #6fb3ff;
+  color: var(--pc-weekend);
 }
 
 .pc-day-padding {
-  color: #55565b;
+  color: var(--pc-text-muted);
 }
 
 .pc-day-today {
-  outline: 1px solid #e0a84a;
+  outline: 1px solid var(--pc-accent);
   font-weight: 700;
 }
 
@@ -191,7 +241,7 @@ window.PERIOD_CALENDAR_CSS = `
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: #e0a84a;
+  background: var(--pc-accent);
 }
 
 /* ---------- Note modal ---------- */
@@ -208,11 +258,11 @@ window.PERIOD_CALENDAR_CSS = `
 
 .pc-modal {
   width: min(360px, calc(100vw - 32px));
-  background: #232326;
-  color: #e6e7eb;
+  background: var(--pc-modal-bg);
+  color: var(--pc-text);
   border-radius: 8px;
   padding: 14px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--pc-shadow);
 }
 
 .pc-modal-title {
@@ -225,9 +275,9 @@ window.PERIOD_CALENDAR_CSS = `
   width: 100%;
   min-height: 90px;
   resize: vertical;
-  background: #17171a;
-  color: #e6e7eb;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--pc-input-bg);
+  color: var(--pc-text);
+  border: 1px solid var(--pc-input-border);
   border-radius: 5px;
   padding: 8px;
   font-size: 12px;
