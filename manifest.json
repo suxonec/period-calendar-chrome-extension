@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Period Calendar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A 13-period, 4-week calendar docked to your browser corner, with per-date notes. Works fully offline.",
   "permissions": ["storage"],
   "icons": {
