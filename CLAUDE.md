@@ -12,7 +12,9 @@ There is no bundler/transpiler — all files are loaded as-is by Chrome. There's
 
 A Chrome extension implementing a "period calendar" — a custom 13-period/4-week calendar system, always available while browsing, with per-date freeform notes stored via `chrome.storage.local`. Fully offline, no network calls, no backend.
 
-Full requirements, functional/non-functional requirements, and open questions are in [period-calendar-requirements.md](period-calendar-requirements.md). Read it before changing scope — it's the source of truth for Must/Should/Could-Have priority and explicitly lists out-of-scope items (no Firefox/Safari support, no localization, no Chrome Web Store publishing for now).
+Full requirements, functional/non-functional requirements, and open questions are in [period-calendar-requirements.md](period-calendar-requirements.md). Read it before changing scope — it's the source of truth for Must/Should/Could-Have priority and explicitly lists out-of-scope items (no Firefox/Safari support, no localization).
+
+**Published:** live on the Chrome Web Store (Unlisted — shareable via link, not publicly searchable): https://chromewebstore.google.com/detail/kcfcdcconjgicnblbbmfcimojcdhiggn. Any change to `manifest.json`, `background.js`, `shared/`, `content/`, or `icons/` needs a version bump in `manifest.json` and a rebuilt `dist/period-calendar.zip` (see below) uploaded to the Developer Dashboard to actually reach users — pushing to GitHub alone does not update the published extension.
 
 **Deviation from the written FR1:** the requirements describe a full-width slim bar docked to the bottom of the viewport. Per direct user instruction, the collapsed state was instead implemented as a small pill anchored to the bottom-**right** corner (styled after a browser extension that shows multiple timezone clocks in that same corner). Clicking the pill pops up the full year grid as a floating panel anchored above it, rather than a full-width expansion. If the written requirements doc is ever revised, reconcile FR1/FR3's wording with this corner-pill behavior.
 

@@ -16,17 +16,18 @@ A Chrome extension that keeps a year-round 13-period / 4-week calendar visible w
 
 ## The period/week system
 
-- The year is divided into **13 periods** of exactly **4 weeks** each (52 weeks/year).
-- Weeks run **Sunday → Saturday**, labeled `P{period}W{week}` (e.g. `P1W1`, `P11W3`).
-- For year Y, `P1W1` starts on the **Sunday on or before January 1 of year Y** — so it can start in late December of the prior year.
-- Each calendar year's 52-week cycle is computed independently; periods never carry over across a year boundary.
-- A handful of trailing days at year-end that fall outside both years' 52-week cycles are shown **without a label**.
+- The year is divided into **13 periods**, normally **4 weeks** each (52 weeks/year) — except in a leap-week year, where Period 13 grows to **5 weeks** (53 weeks/year).
+- Weeks run **Sunday → Saturday**, labeled `P{period}W{week}` (e.g. `P1W1`, `P11W3`, or `P13W5` in a leap-week year).
+- Fiscal year 2000 is anchored to **Sunday, 2000-01-02**; every later year's `P1W1` starts the day after the previous year ends — so cycles chain continuously rather than resetting each January 1.
+- A year gets a leap week (5th week in Period 13) when fewer than 5 calendar days would otherwise remain until December 31 — roughly every 5–6 years (2004, 2009, 2015, 2020, 2026, 2032, 2037, 2043, …).
 
 Full details are in [period-calendar-requirements.md](period-calendar-requirements.md).
 
 ## Installing
 
-This isn't yet published to the Chrome Web Store. To try it now:
+**From the Chrome Web Store:** [Period Calendar on the Chrome Web Store](https://chromewebstore.google.com/detail/kcfcdcconjgicnblbbmfcimojcdhiggn) — click **Add to Chrome**.
+
+**From source (for development):**
 
 1. Clone this repo.
 2. Open `chrome://extensions` in Chrome.

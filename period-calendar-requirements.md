@@ -61,11 +61,9 @@ A Chrome extension that keeps a year-round period calendar visible while browsin
 - Multi-browser support (Firefox/Edge/Safari extension equivalents) — Chrome/Chromium only for this version.
 - Localization/multi-language support.
 - Integration with external calendars (Google Calendar, Outlook, etc.).
-- Publishing to the Chrome Web Store (assume for now this is a personal/unpacked "Developer Mode" install unless the user asks otherwise).
 
 ## 6. Open Questions
 
 - **Permission scope:** does the bar need to appear on *all* websites, or only a defined subset (e.g., excluding banking sites or sites where an overlay could interfere)? Affects the `content_scripts` match pattern and how much permission the extension needs to request. *(Owner: Evgeny)*
 - **BR7 handling (edge-case gap days / pre-2000 years):** currently resolved as "show no label" for adjacent-fiscal-year padding cells, and an independent legacy 52-week cycle for years before the fiscal anchor (2000). Confirm this remains desired behavior. *(Owner: Evgeny)*
-- **Distribution:** load as an unpacked extension (developer mode, no review process, easiest to iterate) vs. eventually publish privately/unlisted on the Chrome Web Store? *(Owner: Evgeny)*
 - **Sync vs. local-only storage (FR16):** worth the added complexity and quota constraints, or is single-machine use sufficient for now? *(Owner: Evgeny)*
