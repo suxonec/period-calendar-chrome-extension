@@ -22,7 +22,7 @@ Full requirements, functional/non-functional requirements, and open questions ar
 
 - [manifest.json](manifest.json) — MV3 manifest. `permissions: ["storage"]` only; content script matches `<all_urls>` (deliberate choice — user opted for broad injection over a restricted allowlist, see NFR2 in the requirements for the trade-off).
 - [background.js](background.js) — service worker. Only job: on toolbar-icon click (`chrome.action.onClicked`), message the active tab's content script to force-open the expanded panel (FR13).
-- [shared/period-calendar.js](shared/period-calendar.js) — pure date logic, no DOM/`chrome.*` calls. Exposes `window.PeriodCalendar` (`getYearCycleStart`, `getWeekLabel`, `getWeekLabelForDate`, `buildYearGrid`, `toISODate`). This is the BR1–BR6 implementation and the only place that math should live.
+- [shared/period-calendar.js](shared/period-calendar.js) — pure date logic, no DOM/`chrome.*` calls. Exposes `window.PeriodCalendar` (`getYearCycleStart`, `getWeekLabel`, `getWeekLabelForDate`, `buildYearGrid`, `toISODate`, `computeFiscalYear`). This is the BR1–BR7 implementation and the only place that math should live.
 - [content/styles.js](content/styles.js) — sets `window.PERIOD_CALENDAR_CSS` (a template string). Kept separate from content.js purely so the stylesheet is easy to skim on its own; injected into the shadow root's `<style>` tag rather than declared in the manifest's content-script `css` array, so it never touches the host page's DOM (NFR3 isolation).
 - [content/content.js](content/content.js) — everything else: builds the closed shadow-DOM host, renders the pill and the expanded panel, owns all UI state (`year`, `notes`, `open`, `dismissed`, `editingIso`, `theme`), wires events, and talks to `chrome.storage.local`.
 - [icons/](icons/) — `icon.svg` is the source (rasterized with `sips -s format png`, no other image tooling available in this environment); `icon{16,32,48,128}.png` are generated and referenced from `manifest.json`. Regenerate all four sizes if `icon.svg` changes — don't hand-edit the PNGs.
@@ -41,11 +41,15 @@ Two `chrome.storage.local` keys, both read once at startup in `content.js`'s `lo
 
 ### Period/week calculation (the trickiest part — read before touching it)
 
-- **13 periods/year, 4 weeks/period, 52 weeks/year total.** Weeks run Sunday → Saturday.
-- **Label format:** `P{period}W{week}`, e.g. `P1W1`, `P11W3` (period 1–13, week 1–4).
-- **Year anchor (BR4):** for year Y, `getYearCycleStart(Y)` = the Sunday on or before Jan 1 of Y — can fall in late December of Y-1.
-- **Cycles don't span years (BR5):** every displayed date in year Y's grid — including adjacent-month padding cells — gets its label from `getWeekLabel(sunday, Y)`, i.e. always Y's own cycle, never Y-1's or Y+1's. `buildYearGrid` relies on this: it never switches cycle year mid-grid, even for December's trailing padding days that are chronologically in January of Y+1.
-- **Trailing gap days (BR6):** `getWeekLabel` returns `null` for any Sunday outside `[cycleStart(Y), cycleStart(Y)+363]`. Callers must handle `null` (no label), not treat it as an error — confirmed 52 unique labels and a handful of expected `null`s at each year's tail when testing `buildYearGrid`.
+This is a **sequential fiscal-year model** ("Mars calendar"), not independent per-calendar-year cycles — see BR1–BR7 in [period-calendar-requirements.md](period-calendar-requirements.md) for the authoritative rules. Summary:
+
+- **13 periods/year, 4 weeks/period normally (52 weeks/364 days total)** — except in a leap-week year, where Period 13 grows to 5 weeks (53 weeks/371 days). Weeks run Sunday → Saturday.
+- **Label format:** `P{period}W{week}`, e.g. `P1W1`, `P11W3`, or `P13W5` in a leap-week year.
+- **Anchor + chaining (BR4):** fiscal year 2000 starts Sunday 2000-01-02 (`ANCHOR_START`). Every other fiscal year N's start is fiscal year N-1's end + 1 day — `computeFiscalYear(N)` derives this recursively and memoizes it in `fiscalYearCache` (a `Map`), since years are **not** independent. A year becomes a 371-day leap-week year when fewer than 5 calendar days would remain until Dec 31 after a normal 364-day cycle — roughly every 5–6 years (2004, 2009, 2015, 2020, 2026, 2032, 2037, 2043, …).
+- **Years before the anchor (2000) fall back to the old independent-per-year rule** (Sunday on/before Jan 1, always 52 weeks, no leap week) — the sequential recurrence has no defined starting point further back.
+- **Fiscal year ≠ Gregorian year window (BR5):** because years chain end-to-end, fiscal year Y's boundaries drift a few days from Jan 1–Dec 31 (e.g. fiscal 2004 runs 2003-12-28 to 2005-01-01). `buildYearGrid(year)` still builds the Gregorian year's 12 months and labels every week via `getWeekLabel(sunday, year)` against fiscal year `year`'s own cycle — it never borrows the neighboring fiscal year's cycle for padding cells.
+- **`getWeekLabelForDate` resolves the correct fiscal year itself** (via `getFiscalYearForDate`) rather than assuming `date.getFullYear()`, since a date near Dec 31/Jan 1 may belong to the adjacent fiscal year once cycles are chained.
+- **Out-of-cycle days (BR7):** `getWeekLabel` returns `null` for any Sunday outside `[fiscalStart(Y), fiscalStart(Y) + weeks*7)`. Callers must handle `null` (no label) — now only occurs for Gregorian-grid padding cells that fall in a neighboring fiscal year, since 364/371-day cycles are exact multiples of 7 (no leftover days within a cycle itself).
 
 ## Key Constraints From Requirements
 
